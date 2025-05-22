@@ -20,3 +20,17 @@ docs = splitter.split_documents(docs)
 # Embed and upload
 embeddings = OpenAIEmbeddings()
 vector_db = Pinecone.from_documents(docs, embeddings, index_name=index_name)
+
+
+
+# from openai import OpenAI
+
+# client = OpenAI(api_key="your-key")
+
+# response = client.embeddings.create(
+#     input=["create test for POST /login"],
+#     model="text-embedding-3-small"
+# )
+
+# vector = response.data[0].embedding
+
