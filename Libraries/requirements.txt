@@ -1,4 +1,4 @@
-openai==1.14.3
+openai>=1.14.3
 tiktoken==0.5.1
 python-dotenv==1.0.1
 requests==2.31.0
@@ -10,7 +10,7 @@ uuid==1.30
 # chromadb==0.4.24
 
 # Pinecone (cloud-based vector DB)
-# pinecone-client==3.0.0
+pinecone==3.0.0
 
 # Optional (for chunking & LLM chains if needed)
 # langchain==0.1.16

@@ -1,0 +1,11 @@
+{
+    "name": "abc",
+    "age": 18,
+    "gender": "male",
+    "address": {
+        "street": "123 Main St"
+    },
+        "city": "New York",
+        "state": "NY",
+        "zip": "10001"
+    }
