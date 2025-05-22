@@ -7,10 +7,10 @@ uuid==1.30
 
 # Vector DB options (install only the one you choose to use)
 # ChromaDB (local, embedded vector DB)
-chromadb==0.4.24
+# chromadb==0.4.24
 
 # Pinecone (cloud-based vector DB)
-pinecone-client==3.0.0
+# pinecone-client==3.0.0
 
 # Optional (for chunking & LLM chains if needed)
-langchain==0.1.16
+# langchain==0.1.16
