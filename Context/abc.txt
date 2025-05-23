@@ -1,0 +1,13 @@
+
+This is sample payload
+
+    "id": "abc",
+    "metadata": 18,
+    "gender": "male",
+    "address": {
+        "street": "123 Main St"
+    },
+        
+        metadata = "city": "New York",
+                    "state": "NY",
+                    "zip": "10001"
