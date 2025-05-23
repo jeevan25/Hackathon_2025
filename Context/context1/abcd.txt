@@ -1,13 +1,18 @@
+endpoint = https://xyz/dashboard/create/alert
 
+payload = {
+            "title" : "test_alert"
+            "description": "Test description"
+          }
 
-Test instructions : This is the test instruction
-    "name": "abc",
-    "age": 18,
-    "gender": "male",
-    "address": {
-        "street": "123 Main St"
-    },
-        "city": "New York",
-        "state": "NY",
-        "zip": "10001"
-    
+Response  = {
+             "results": [{
+             "title" : "test_alert"
+            "description": "Test description"
+             }      ]
+              }  
+
+Test instructions : 1. Create api test cases with different inputs
+                    2. Mandatory field checks
+
+ 

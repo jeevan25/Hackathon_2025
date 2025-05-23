@@ -168,7 +168,7 @@ def embed_and_store_item(text, source_filename, openai_client_instance, pinecone
 if __name__ == "__main__":
     # chunk = read_context_files("/Users/jeevan.kumar/Documents/Hackathon_2025/Context/context1")
     # embed_and_store_item(chunk,openai_client,index)
-    file_path = "/Users/jeevan.kumar/Documents/Hackathon_2025/Context/context1/abcd.txt"
+    file_path = "/Users/jeevan.kumar/Documents/Hackathon_2025/Context/context1/post_indicators.txt"
     
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
@@ -179,6 +179,5 @@ if __name__ == "__main__":
         "text": text,
         "metadata": {"source": os.path.basename(file_path), "text": text}
     }
-    import pdb;pdb.set_trace()
 
-    embed_and_store_item(single_chunk,"abcd.txt", openai_client, pc.Index(index_name))
+    embed_and_store_item(single_chunk,"post_indicators.txt", openai_client, pc.Index(index_name))
