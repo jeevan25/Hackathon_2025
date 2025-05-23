@@ -1,0 +1,33 @@
+Endpoint: /csap/v1/tag/
+Method: POST
+Authentication: Required
+
+Payload Schema:
+{
+  "tag_name": "string"   // Required, name of the tag to be created (max 100 characters)
+}
+
+Key Notes:
+- "tag_name" is a mandatory field.
+- The tag name must be within 100 characters.
+
+Expected Response:
+{
+  "tag_name": "Sample Tag",                           // Name of the tag created
+  "tag_id": "27b7b69e-2f43-4c1c-b969-3cc72463d3e3",   // Unique identifier of the created tag
+  "is_active": true,                                  // Indicates whether the tag is active
+  "tag_slug": "sample-tag"                            // Slugified version of the tag name
+}
+
+Error Scenarios:
+- Missing "tag_name" field returns 400 Bad Request.
+- If "tag_name" exceeds 100 characters, returns 400 with response as { "detail": "Tag names can't exceed 100 characters. Review and try again." }.
+
+Verification Logic:
+- After a POST request is made, use a GET request to confirm that the tag was actually added.
+- This ensures that the POST not only returns a successful status code, but that the backend state reflects the change.
+
+Example verification step:
+→ Perform GET /v1/tag/
+  - Validate the returned tag list contains an entry with "tag_name" matching the POST payload.
+  - Confirm that `is_active` is `true`.

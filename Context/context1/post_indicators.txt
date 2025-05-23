@@ -10,26 +10,39 @@ Payload Schema:
 Key Notes:
 - "threat_indicators" is a mandatory field.
 - Accepts multiple indicators in a comma-separated string.
-- The system categorizes each indicator (IP, domain, hash, etc.) automatically.
+- Try with all types of indicators and combinations also.
+- Indicators should be generated randomly.
 
-allowed_types = ["domain","ip","url","email","sha1","sha256","md5","cve","ipv4_cidr"
+allowed_types = [
+  "domain", "ip", "url", "email",
+  "sha1", "sha256", "md5", "cve", "ipv4_cidr"
 ]
 
 Expected Response:
 {
-  "sha256": [],                    # List of SHA-256 indicators added to the allow list
-  "domain": [ "exampledomain.com" ],  # List of domain indicators added
-  "sha1": [],                      # List of SHA-1 indicators added
-  "url": [],                       # List of URL indicators added
-  "ip": [ "1.1.1.1" ],             # List of IP address indicators added
-  "cve": [],                       # List of CVEs (Common Vulnerabilities and Exposures) added
-  "email": [],                     # List of email indicators added
-  "md5": [],                       # List of MD5 hash indicators added
-  "ipv4_cidr": [],                 # List of IPv4 CIDR indicators added
-  "blocked_indicators": [],       # Indicators that were previously allowed but are now inactive
-  "duplicate_indicators": []      # Indicators already existing in the allow list
+  "sha256": [],                        # List of SHA-256 indicators added to the allow list
+  "domain": ["exampledomain.com"],    # List of domain indicators added. Next keys data will also be a list of the respective key type indicators till ipv4_cidr key.
+  "sha1": [],
+  "url": [],
+  "ip": ["1.1.1.1"],
+  "cve": [],
+  "email": [],
+  "md5": [],
+  "ipv4_cidr": [],
+  "blocked_indicators": [],           # Previously added but inactive indicators
+  "duplicate_indicators": []          # Indicators already present in the allow list
 }
 
 Error Scenarios:
 - Missing "threat_indicators" field returns 400 Bad Request.
-- Adding same indicator again should return the same indicator in 'duplicate_indicators' in the response
+- Adding the same indicator again returns it in ‘duplicate_indicators’ in the response.
+
+Verification Logic:
+- After a POST request is made, use a GET request to confirm that the indicators were actually added.
+- This ensures that the POST not only returns a successful status code, but that the backend state reflects the change.
+
+Example verification step:
+→ For each indicator in the POST payload, perform:
+  - GET /csap/v1/allowed_indicators/?value=<indicator>&type=<type>
+  - Validate the returned indicator list contains the indicator
+  - Confirm that `is_active` is `true` and `is_removed` is `false`
