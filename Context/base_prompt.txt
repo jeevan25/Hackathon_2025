@@ -25,26 +25,14 @@ csap_automation/
 
 I want you to keep in mind that these functions wrapper for requests module in base/api_requests.py
 Everytime you make a request, you must use these functions
-
 endpoints must be defined in apiLibrary/open_api/api_endpoints.py
 for example: 
+
 class OpenAPIendpoint():
     #Alerts
     alert_list = "csap/v1/list_alert/"
     category_list = "csap/v1/list_category/"
     category_details = "csap/v1/list_category"
-
---> This is Common Data file stored in dataDirectory/common_data.py, important data to remember would be  
-class DataClass():
-    base_name = "CSAP_AUTO_"
-    RgName = {
-        "ALL_ENV_MEMBERS": base_name+"RG_env_members_all",
-        "ALL_ENV_MEMBERS_EXCEPT_SCRIPT_RUNNER": base_name+"RG_env_members_except_script_runner",
-        "EMAIL_GROUP":base_name+"Email_Only_RG"
-    }
-    CategoryName = {
-            "HAVING_THREAT_INDICATOR_AND_TACTIC_TECHNIQUES_FIELDS": base_name+"Category_Tactic_and_Threat_fields",
-        }
 
 Pytest-based API testing framework uses a specific convention for generating two files per endpoint: 
 1. A helper file under `apiLibrary/open_api/`.
@@ -52,7 +40,6 @@ Pytest-based API testing framework uses a specific convention for generating two
 
 Test files include full test classes using pytest, allure, and internal utilities like `GenerateCredentials`, `CSAPAPI`, and helper classes (e.g., `OpenAPIDocLibrary`). Data for tests is sourced from `dataDirectory/common_data.py`, and API status codes are defined in `dataDirectory/api_status_codes.py`.
 Helper files encapsulate API-specific payload construction logic. The user will provide endpoint definitions and schemas for which they want automated test generation.
-
 The following is the an example test file, you will notice general conventions 
 
 import pytest
@@ -84,14 +71,9 @@ class TestDashboardDocLibrary():
         self.__class__.rg_api = DashboardRecipientGroups(self.dashboard_token) #Instantiate RecipientGroups class to retrieve rg_id
         self.__class__.doclibrary_open_api = OpenAPIDocLibrary() #Instantiate helper functions
         self.__class__.rg_id = self.rg_api.get_rg_id(rg_name) #retrieve rg_id
-        self.__class__.analyst_email_id = os.getenv("WEBAPP_MEMBER_ADMIN_EMAIL")
-        yield
-        revoke_response = self.analyst.revoke_open_api_credentials(self.analyst.payload_for_revoking_credentials(self.key_id, self.app_name)) #Revoke OpenAPI creds 
-        self.log.info(revoke_response.text)
+        self.__class__.analyst_email_id = os.getenv("WEBAPP_MEMBER_ADMIN_EMAIL") #gets variable defined in env
 
     #You must create testcases in this fashion
-    @pytest.mark.apiTestCase
-    @pytest.mark.regression
     @pytest.mark.openApi
     @allure.title("Create a Basic Folder")
     def test_create_folder(self):
@@ -100,8 +82,6 @@ class TestDashboardDocLibrary():
         response = self.csap_open_api.query("POST", self.base_url + OpenAPIendpoint.upload_folder, data = payload) #Make the query with our custom wrapper 
         assert response.status_code == ApiStatusCodes.OK, invalid_status_code_message #Validate Response code
 
-    @pytest.mark.apiTestCase
-    @pytest.mark.regression
     @pytest.mark.openApi
     @allure.title("Create a Folder with Recipent Groups")
     def test_create_folder_recipientgroups(self):
@@ -112,18 +92,14 @@ class TestDashboardDocLibrary():
             group_id = self.rg_id, #pass recipient group id retrieved in class setup)
         response = self.csap_open_api.query("POST", self.base_url + OpenAPIendpoint.upload_folder, data = payload)
         assert response.status_code == ApiStatusCodes.OK, invalid_status_code_message
-
-
-    @pytest.mark.apiTestCase
-    @pytest.mark.regression
-    @pytest.mark.openApi    #Folder Details API Testcases
+        
+    @pytest.mark.apiTestCase    #Folder Details API Testcases
     @allure.title("Get Folder Details from Folder ID")
     def test_folder_details(self):
         response = self.csap_open_api.query("GET", self.base_url + OpenAPIendpoint.upload_folder, folder_id = self.parent_testfolder_id)
         assert response.status_code == ApiStatusCodes.OK, invalid_status_code_message
 
 ---> And the example of the helper file stored in apiLibrary/open_api/
-
 from utilities.utils import Util
 class OpenAPIDocLibrary:
 
