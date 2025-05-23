@@ -4,7 +4,7 @@ I will need you to help me write testcases for OpenAPI for this application:
 csap_automation/
 ├── apiLibrary/
 │   └── open_api/
-│       ├── reports_api.py
+│       ├── doclibrary_api.py
 │       └── generate_credentials.py
 ├── base/
 │   └── api_requests.py
@@ -14,7 +14,7 @@ csap_automation/
 │   ├── backend_tc/
 │   │   ├── dashboard_api/
 │   │   ├── open_api/
-│   │   │   └── test_dashboard_reports_api.py
+│   │   │   └── test_doc_library_api.py
 │   │   └── webapp_api/
 │   ├── frontend_tc/
 │   │   ├── dashboard/
