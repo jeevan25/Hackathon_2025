@@ -189,7 +189,6 @@ class OpenAPIDocLibrary:
         }]
 
         return payload
-    
 
     def upload_file_payload(self, file, file_ext, group_id = "", tlp = "", individual_email = "", file_name = "", parent_folder_id = ""):
         payload = {
