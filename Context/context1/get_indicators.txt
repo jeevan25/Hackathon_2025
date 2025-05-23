@@ -1,0 +1,40 @@
+Endpoint: /csap/v1/allowed_indicators/
+Method: GET
+Authentication: Required
+
+Query Parameters:
+{
+  "page": "integer (optional, default: 1)",           # Page number to retrieve
+  "page_size": "integer (optional, default: 10)",     # Number of records per page
+  "type": "string (optional)",                        # Filter by indicator type (see allowed_types)
+  "value": "string (optional)"                        # Keyword to search indicator values (e.g., "1.1.1.1")
+}
+
+Key Notes:
+- Supports pagination via `page` and `page_size`.
+- Supports filtering by `type` (indicator category).
+- Supports keyword-based value search using `value`.
+
+allowed_types = [
+  "domain", "sha1", "sha256", "ipv6", "ipv4", "email", "url", "ip", "md5"
+]
+
+Expected Response:
+{
+  "count": 3,                    # Total number of matching indicators
+  "data": [
+    {
+      "id": "353ab66f-e7e7-4848-861b-163e687ba059",    # Unique ID of the indicator
+      "created": 1615793377,                           # Epoch timestamp when the indicator was added
+      "field_name": "email",                           # Type of indicator (e.g., "email", "domain")
+      "field_value": "john.doe@example.com",           # Actual indicator value
+      "is_active": true,                               # Whether the indicator is active
+      "is_removed": false                              # Whether the indicator is removed
+    },
+    ...
+  ]
+}
+
+Error Scenarios:
+- If no results are found, "count" will be 0 and "data" will be an empty list.
+- Invalid "type" parameter returns 200 with "count" as 0 and "data" as empty list.

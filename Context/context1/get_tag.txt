@@ -1,0 +1,26 @@
+Endpoint: /v1/tag/
+Method: GET
+Authentication: Required
+
+Query Parameters:
+{}
+
+Key Notes:
+- This endpoint retrieves all tags available in the Tag Library.
+- No query parameters are required.
+- Useful for tagging, enrichment, and classification features in other modules.
+
+Expected Response:
+[
+  {
+    "tag_name": "Malware",          // Name of the tag
+    "tag_id": "a2997d05-b6a1-4b5e", // Unique identifier for the tag
+    "is_active": true,              // Whether the tag is active
+    "tag_slug": "malware"           // Slug version of the tag name for URLs or identifiers
+  },
+  ...
+]
+
+Error Scenarios:
+- If no tags exist, an empty list `[]` is returned with status code 200.
+- If authentication fails, returns 401 Unauthorized.
