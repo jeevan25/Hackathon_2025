@@ -1,0 +1,9 @@
+The Doc Library is a secure place to store text, image, and video files where analysts and members can store and maintain important cybersecurity files. For more information, see Collaborate Doc Library Documentation.
+
+As an analyst, you can perform the following actions in this section:
+
+    Upload a File: Upload a file to the Doc Library and share it with recipient groups or individual recipients.
+    Access Document: Retrieve details of a document or folder from the Doc Library.
+    Create a Folder: Create a folder in the Doc Library within a parent folder or in the root directory.
+    Access Folder Details: Retrieve details of a folder or the root directory.
+

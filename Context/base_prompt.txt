@@ -1,0 +1,260 @@
+This is the my pytest framework repository structure used to write automation testcases for a product named CSAP
+I will need you to help me write testcases for OpenAPI for this application:
+
+csap_automation/
+├── apiLibrary/
+│   └── open_api/
+│       ├── reports_api.py
+│       └── generate_credentials.py
+├── base/
+│   └── api_requests.py
+├── dataDirectory/
+│   └── common_data.py
+├── tests/
+│   ├── backend_tc/
+│   │   ├── dashboard_api/
+│   │   ├── open_api/
+│   │   │   └── test_dashboard_reports_api.py
+│   │   └── webapp_api/
+│   ├── frontend_tc/
+│   │   ├── dashboard/
+│   │   └── webapp/
+│   └── conftest.py
+└── utilities/
+    └── utils.py
+
+I want you to keep in mind that these functions wrapper for requests module in base/api_requests.py
+Everytime you make a request, you must use these functions
+
+endpoints must be defined in apiLibrary/open_api/api_endpoints.py
+for example: 
+class OpenAPIendpoint():
+    #Alerts
+    alert_list = "csap/v1/list_alert/"
+    category_list = "csap/v1/list_category/"
+    category_details = "csap/v1/list_category"
+    organization_type_list="csap/v1/get_organization_type/"
+    organization_list="csap/v1/get_organization_list/"
+    organization_ip_and_domain_list="csap/v1/organization/{org_id}/ip_domains/"
+    create_organization="csap/v1/create_organization/"
+
+
+->each module needs to generate openAPI credentials: 
+->apiLibrary/open_api/generate_credentials.py can be used: 
+
+from apiLibrary.dashboard.db_api_login import TOKEN
+from apiLibrary.open_api.api_endpoint import OpenAPIendpoint
+from pytest_testconfig import config
+from base.api_requests import Request
+import utilities.Custom_Logger as cl
+
+from utilities.utils import Util
+
+
+class GenerateCredentials:
+    log = cl.customLogger()
+
+    def __init__(self, token):
+        self.headers = {
+            "content-type": "application/json;charset=UTF-8",
+            "authorization": f"Token {token}",
+        }
+    
+    def payload_for_analyst_role(self):
+        app_name = "CSAP_AUTO_Analyst_Role_" + Util.getUniqueName()
+        analyst_role_payload = {
+            "app_name": app_name
+            }
+        return analyst_role_payload
+
+    def payload_for_member_role(self, org_id, tenant_id, role_id, display_name):
+        app_name = "CSAP_AUTO_Analyst_Role_" + Util.getUniqueName()
+        member_role_payload = {
+            "app_name":app_name,
+            "share_with_members":True,
+            "global_access":False,
+            "org_id":org_id,
+            "role":{
+                "id":role_id,
+                "display_name":display_name
+            },
+            "tenantuser":{
+                "tenant_user_id":tenant_id,  
+            },
+            "allowed_action":"VIEW"
+            }
+        self.log.info(member_role_payload)
+        return member_role_payload
+    
+    def genrate_open_api_credentials(self, role_payload):
+        self.log.info("API Request :: Creating credentials")
+        self.log.info(role_payload)
+        response = Request.post(
+            config["API_ENDPOINTS"]["ANALYST_ROLE"], role_payload, self.headers
+        )
+        return response
+    
+    def revoke_open_api_credentials(self, role_payload):
+        self.log.info("API Request :: Revoking credentials")
+        self.log.info(role_payload)
+        response = Request.put(
+            config["API_ENDPOINTS"]["ANALYST_ROLE"], role_payload, self.headers
+        )
+        return response
+
+    def payload_for_revoking_credentials(self, key_id, app_name):
+        revoking_credentials_payload = {
+            "key_id": key_id,
+            "app_name": app_name,
+            "is_active": False,
+        }
+        return revoking_credentials_payload
+
+    def get_role_for_open_api(self, display_name):
+        role_details = Request.get(
+            OpenAPIendpoint.role_api, headers=self.headers
+        )
+        assert role_details.status_code == 200
+        role_details_json = role_details.json()
+        role_id = ""
+        for value in role_details_json["results"]:
+            if value["display_name"] == display_name:
+                role_id = str(value["id"])
+                break
+        return role_id
+
+-->  This is the utilities file, `utilities/utils.py` file contains a comprehensive `Util` class with methods for logging, random data generation (IP, domain, email, file path, hash, etc.), text/list/sequence verification, time conversion (including IST and epoch), and JSON key searching.
+"""
+@package utilities
+Util class implementation
+All most commonly used utilities should be implemented in this class
+Example:
+    name = self.util.getUniqueName()
+"""
+import time
+import string
+import utilities.Custom_Logger as cl
+import logging
+import pytz
+from datetime import datetime
+from collections import Counter
+import secrets
+import calendar
+import re
+
+class Util(object):
+    log = cl.customLogger(logging.INFO)
+
+    def sleep(self, sec, info=""):
+        """
+        Put the program to wait for the specified amount of time
+        """
+        if info is not None:
+            self.log.info("Wait :: '" + str(sec) + "' seconds for " + info)
+        try:
+            time.sleep(sec)
+        except InterruptedError:
+            self.log.info("InterruptedError")
+
+    @classmethod
+    def getAlphaNumeric(self, length, type="letters"):
+        """
+        Get random string of characters
+        Parameters:
+            length: Length of string, number of characters string should have
+            type: Type of characters string should have. Default is letters
+            Provide lower/upper/digits for different types
+        """
+        alpha_num = ""
+        if type == "lower":
+            case = string.ascii_lowercase
+        elif type == "upper":
+            case = string.ascii_uppercase
+        elif type == "digits":
+            case = string.digits
+        elif type == "mix":
+            case = string.ascii_letters + string.digits
+        else:
+            case = string.ascii_letters
+        return alpha_num.join(secrets.choice(case) for _ in range(length))
+
+    @classmethod
+    def getUniqueNameList(self, listSize=5, itemLength=None):
+        """
+        Get a list of valid email ids
+        Parameters:
+            listSize: Number of names. Default is 5 names in a list
+            itemLength: It should be a list containing number of items equal to the listSize
+                        This determines the length of the each item in the list -> [1, 2, 3, 4, 5]
+        """
+        nameList = []
+        for i in range(0, listSize):
+            nameList.append(self.getUniqueName(itemLength[i]))
+        return nameList
+
+    @classmethod
+    def verifyTextContains(self, actualText, expectedText):
+        """
+        Verify actual text contains expected text string
+        Parameters:
+            expectedList: Expected Text
+            actualList: Actual Text
+        """
+        self.log.info("Actual Text From Application Web UI --> :: " + actualText)
+        self.log.info("Expected Text From Application Web UI --> :: " + expectedText)
+        if expectedText.lower() in actualText.lower():
+            self.log.info("### VERIFICATION: CONTAINS !!!")
+            return True
+        else:
+            self.log.info("### VERIFICATION: DOES NOT CONTAIN !!!")
+            return False
+
+    @classmethod
+    def verifyTextMatch(self, actualText, expectedText):
+        """
+        Verify text match
+        Parameters:
+            expectedList: Expected Text
+            actualList: Actual Text
+        """
+        self.log.info("Actual Text From Application Web UI --> :: " + str(actualText))
+        self.log.info("Expected Text From Application Web UI --> :: " + str(expectedText))
+        if actualText.lower() == expectedText.lower():
+            self.log.info("### VERIFICATION: TEXT MATCH !!!")
+            return True
+        else:
+            self.log.info("### VERIFICATION DOES NOT  MATCHED !!!")
+            return False
+
+    @classmethod
+    def get_all_csap_supported_indicators(cls, additional_inds=False):
+        indicators = {
+            "ipv4-addr": cls.generate_random_ipv4(),
+            "ipv6-addr": cls.generate_random_ipv6(),
+            "cidr-ipv4": cls.generate_random_cidr_ipv4(),
+            "domain-name": cls.generate_random_domain(),
+            "url": cls.generate_random_url(),
+            "email-addr": cls.generate_random_email_address(),
+            "MD5": cls.generate_random_hash(hash_type="md5"),
+            "SHA-1": cls.generate_random_hash(hash_type="sha1"),
+            "SHA-224": cls.generate_random_hash(hash_type="sha224"),
+            "SHA-256": cls.generate_random_hash(hash_type="sha256"),
+            "SHA-384": cls.generate_random_hash(hash_type="sha384"),
+            "SHA-512": cls.generate_random_hash(hash_type="sha512"),
+            "SSDEEP": cls.generate_random_ssdeep(),
+            "file": cls.generate_random_file_paths(),
+            "windows-registry-key": cls.generate_random_windows_registry(),
+            "autonomous-system": cls.generate_random_autonomous_system(),
+            "directory": cls.generate_random_directory(),
+            "mac-addr": cls.generate_random_mac_address()
+        }
+        if additional_inds:
+            indicators.update(
+                {
+                    "Email Subject": "Email Subject " + cls.getUniqueName(),
+                    "Email Description": "Email Description " + cls.getUniqueName()
+                }
+            )
+        return indicators
+
+remember all this for further code execution

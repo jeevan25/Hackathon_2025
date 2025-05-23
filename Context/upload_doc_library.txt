@@ -1,0 +1,43 @@
+Endpoint: /csap/v1/upload_media/
+Method: POST
+
+Description :
+Upload a file to the Doc Library and share it with recipient groups and individual recipients.
+
+Example Request: 
+{
+  "user_groups": "b2aa0998", #this must be a valid rg id 
+  "tlp": "WHITE",
+  "file": "694892c5-Sample_file.png",
+  "individual_recipients": "john.doe@example.com",
+  "file_name": "Test Image",
+  "parent_folder_id": "0888cb50-f234-422b-8765-65bdc62fa819"
+}
+
+Mandatory Fields: Fields that are mandatory are user_groups, tlp, file and file_name
+
+Dependencies:
+    user_groups: To retrieve rg id, refer the sample file shared to you, implementation must be the exact same using the similar function
+    file: retrieve files based on sample_{ext}.{ext} #ext refers to extension, valid file extensions are defined in DataClass 
+    individual_recipients: This field depends on valid email IDs, skip this field as there is no existing method to get valid emails
+    parent_folder_id: Parent folder id must be retrieved either by creating a new folder, or retrieving existing folders. Via Endpoint /csap/v1/folder-details/
+
+Expected Status Code: 200
+
+Example Response: {
+  "document_id": "589003d5-2fa8-4130-bda6-3b03c68a7388", 
+  "document_file": "https://example.com/media/sample-image.png?X-Amz-Expires=3600&X-Amz-Signature=signature",
+  "content_type": "image/png",
+  "tlp": "WHITE",
+  "file_name": "Test Image",
+  "file_format": "png",
+  "size": 156010,
+  "download_count": {},
+  "document_group": [
+    {
+      "group_name": "john.doe@example.com"
+    }
+  ]
+}
+
+Expected Testcases: 

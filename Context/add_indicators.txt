@@ -1,0 +1,33 @@
+Endpoint: /csap/v1/allowed_indicators/
+Method: POST
+
+Body Parameters:
+    threat_indicators(string)
+    Pass the indicators to be added to the allowed list. You can enter multiple indicators as comma separated values.
+    Example: "exampledomain.com, 1.1.1.1"
+
+Example Parameters: 
+    {
+        "threat_indicators": "exampledomain.com, 1.1.1.1"
+    }
+
+Expected Status Code: 200
+Expected Example Response: {
+    "sha256": [],
+    "domain": [
+        "exampledomain.com"
+    ],
+    "sha1": [],
+    "url": [],
+    "ip": [
+        "1.1.1.1"
+    ],
+    "cve": [],
+    "email": [],
+    "md5": [],
+    "ipv4_cidr": [],
+    "blocked_indicators": [],
+    "duplicate_indicators": []
+}
+
+Error Scenarios: Should throw 400 status code when indicator of incorrect type is sent. Or is Indicator is of incorrect value

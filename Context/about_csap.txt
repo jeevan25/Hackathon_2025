@@ -1,0 +1,25 @@
+About CSAP:
+Organizations worldwide face increasingly sophisticated and coordinated cybersecurity threats, making it crucial for security teams to adopt a collaborative approach to define their security strategy. CSAP is a situational awareness platform that enables real-time threat alert sharing and aggregation, helping you effectively respond to threats through information sharing, coordination, and collaboration among security analysts. 
+With CSAP, you can enrich, anonymize, and share precise threat intelligence, including indicators of compromise (IOCs) and incident responses. CSAP's API is organized around REST and is available to all customers. The API endpoints contain predictable resource-oriented URLs, return JSON-encoded responses, and use standard HTTP response codes, and authentication.
+
+The following are the two portals in CSAP:
+
+Analyst Portal
+The Analyst Portal is an administrative module mainly used by administrators and analysts to create and share information with members. Administrators set the application and user preferences for all users through the Analyst Portal.
+
+Member Portal
+The Member Portal is used by security teams and member organizations for receiving strategic intelligence and alerts. It works along with the Analyst Portal to enhance communication and strategic intelligence sharing among employees and member organizations.
+
+The Analyst Portal is an admin module mainly used by administrators and analysts. Analysts create and share information with members. Administrators set the application and user preferences for all users through the Analyst Portal.
+
+As an analyst, you can perform the following actions:
+
+Alert Management: Create and publish alerts about vulnerabilities, exploits, and security issues to members.
+Organization Management: Create and manage organizations, control their status, and access related data for efficient alert sharing.
+Manage Intel Submissions: Manage threat intel submissions from members to enable bi-directional sharing of critical information as alerts across the organization.
+Manage Request for Information (RFI): Manage RFIs submitted by members, review and publish them as alerts, and foster collaboration to enhance security.
+Intelligence Requirements: Retrieve Intelligence Requirements (IRs) and their followers.
+Allowed Indicators: Add trusted indicators to your allow list to enhance alert quality and support informed decision-making.
+Manage Members: Add and manage members, modify their details and status, and access member information as needed.
+Doc Library: Manage and share files, documents, and attachments to facilitate coordination between analysts and members.
+Tag Library: Organize and manage tags to efficiently categorize and locate items within the platform.
