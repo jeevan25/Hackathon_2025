@@ -1,0 +1,29 @@
+Endpoint: /csap/v1/get_intel_detail/{incident_id}
+Method: GET
+Authentication: Required
+
+Path Parameters:
+{
+  "incident_id": "string (required)"   # Unique identifier of the intel to retrieve.
+}
+
+Key Notes:
+- The `incident_id` must be passed in the URL path.
+- You can obtain the `incident_id` from the response of the POST request to /csap/v1/report_intel/.
+- This endpoint returns detailed information about a specific piece of submitted intel.
+
+Dependencies:
+- Requires a valid `incident_id` generated from a prior POST to /csap/v1/report_intel/.
+
+Expected Response:
+{
+  "incident_id": "CY-5a782453",     # Unique identifier of the intel
+  "title": "Sample Intel Title",    # Title of the intel
+  "description": "Detailed description of the intel",   # Description of the submitted intel
+  "tlp": "AMBER"                    # TLP classification associated with the intel
+}
+
+Error Scenarios:
+- If `incident_id` is missing or malformed, returns 404 Bad Request.
+- If `incident_id` does not exist, returns 404 Not Found.
+- If the user does not have access rights to the requested intel, returns 403 Forbidden.

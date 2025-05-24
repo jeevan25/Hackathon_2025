@@ -1,0 +1,38 @@
+Endpoint: /csap/v1/rfi/{incident_id}/
+Method: GET
+Authentication: Required
+
+Path Parameters:
+{
+  "incident_id": "string"   # Required, Unique identifier of the RFI (e.g., 'CY-5a782453')
+}
+
+Key Notes:
+- Use the `incident_id` from a previously created RFI (POST /csap/v1/rfi/).
+- Returns details of a single RFI corresponding to the provided `incident_id`.
+- Endpoint returns a list of one item under `data`.
+
+Expected Response:
+{
+  "count": 1,                      // Number of matching RFIs found (always 1 for this endpoint)
+  "data": [
+    {
+      "incident_id": "CY-5a782453", // Unique ID of the RFI
+      "title": "title",             // Title of the RFI
+      "description": "description", // Description of the RFI
+      "tlp": "WHITE",               // TLP level (WHITE, GREEN, AMBER, RED)
+      "status": "OPEN"              // Status of the RFI (e.g., OPEN, CLOSED)
+    }
+  ]
+}
+
+Error Scenarios:
+- Invalid or missing `incident_id` returns empty "data" and "count" as 0.
+- If the RFI with the specified `incident_id` does not exist or is deleted, "count" will be 0 and "data" will be an empty list.
+
+Verification Logic:
+- After creating an RFI via POST /csap/v1/rfi/, use this endpoint to validate the RFI details.
+→ Example:
+  - Capture the `incident_id` from the POST response.
+  - Perform GET /csap/v1/rfi/{incident_id}
+  - Verify returned RFI matches the created values (title, description, tlp).

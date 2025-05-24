@@ -1,0 +1,27 @@
+Endpoint: /csap/v1/list_intel_category/
+Method: GET  
+Authentication: Required
+
+Dependencies -
+- This Open API is used to fetch categories can be used to create Intel using POST /csap/v1/report_intel/ Open API call.
+
+Key Notes:
+- This endpoint returns a list of all available intel categories in the system.
+- Each category contains a unique ID and a name.
+- Useful for creating Intel data using POST /csap/v1/report_intel/ Open API.
+
+Expected Response:
+[
+  {
+    "category_id": "d56d03d9",                // Unique identifier for the intel category
+    "category_name": "Collective Intelligence" // Descriptive name of the intel category
+  },
+  {
+    "category_id": "b1d0826c",                // Unique identifier for the intel category
+    "category_name": "Cyber Vulnerability"     // Descriptive name of the intel category
+  }
+]
+
+Error Scenarios:
+- If authentication is missing or invalid, a 401 Unauthorized.
+- In the response, "Request for Information" category should not be present.
