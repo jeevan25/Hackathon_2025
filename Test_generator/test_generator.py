@@ -34,7 +34,7 @@ def get_embedding(text):
     )
     return res.data[0].embedding
 
-def query_vector_db(query, top_k=1):
+def query_vector_db(query, top_k=2):
     """Search Pinecone for top-k most relevant context chunks."""
     query_embedding = get_embedding(query)
     results = index.query(vector=query_embedding, top_k=top_k, include_metadata=True)
@@ -43,7 +43,7 @@ def query_vector_db(query, top_k=1):
     # import pdb; pdb.set_trace()  
     return [match["metadata"]["text"] for match in results["matches"]]
 
-def build_final_prompt(user_input, context_chunk):
+def build_final_prompt(user_input, context_chunk,extra_input):
     file_path1 = "/Users/jeevan.kumar/Documents/Hackathon_2025/Instructions/instruct.txt"
     with open(file_path1, "r", encoding="utf-8") as f:
         text = f.read()
@@ -54,10 +54,9 @@ def build_final_prompt(user_input, context_chunk):
     instruct = text
     
     return f"""You are an expert Python API automation engineer.
-
                 Using the following context about the endpoint
-
                 Use the instructions to structure the test cases according to our framework standards.
+                If you need to include *any non-code text or explanations*, comment those lines with #
 
                 Instructions :
                 {instruct}
@@ -65,17 +64,16 @@ def build_final_prompt(user_input, context_chunk):
                 Context:
                 {context_text}
 
-                User Request:
+                Specific user Input:
                 {user_input}
-
 
                 Generate 10 test cases(5 positive, 2 negative and 3 edge case) in Python. Generate a test file and a helper file
                 """
 
-def generate_test_code(user_input,test_file_name):
+def generate_test_code(user_input,test_file_name,extra_input=""):
     """Orchestrates the entire flow from query to final response."""
     context_chunk = query_vector_db(user_input)
-    final_prompt = build_final_prompt(user_input, context_chunk)
+    final_prompt = build_final_prompt(user_input, context_chunk,extra_input)
 
     print("⏳ Sending to OpenAI...")
     response = openai_client.chat.completions.create(
@@ -98,8 +96,9 @@ def generate_test_code(user_input,test_file_name):
 
 # Example usage
 if __name__ == "__main__":
-    # user_question = input("/csap/v1/allowed_indicators/,indicators")
-    user_question = input("Enter your end point :")
-    test_file_name = input("Enter the test file name :")
+    # user_question = input("/csap/v1/allowed_indicators/")
+    user_question = input("Enter your end point : ")
+    test_file_name = input("Enter the test file name : ")
+    extra_input = input("Enter any specific input (Optional) : ")
 
-    generate_test_code(user_question,test_file_name)
+    generate_test_code(user_question,test_file_name,extra_input)
