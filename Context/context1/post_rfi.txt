@@ -7,7 +7,7 @@ Payload Schema:
   "title": "string",        // Required, title of the RFI
   "description": "string",  // Required, description of the RFI
   "tlp": {
-       "tlp_name": "GREEN"       // Required, TLP level (must be one of: RED, AMBER, GREEN, WHITE)
+       "tlp_name": "string"       // Required, TLP level (must be one of: RED, AMBER, GREEN, WHITE)
   }
 }
 
@@ -15,6 +15,7 @@ Key Notes:
 - "title" is a mandatory field that defines the RFI title.
 - "description" is required and provides contextual information about the RFI.
 - "tlp" is required and must be one of the predefined levels: RED, AMBER, GREEN, WHITE.
+- Follow the mentioned Test Flows and Verification Logic to create testcases
 
 Allowed TLP Values:
 ["RED", "AMBER", "GREEN", "WHITE"]
@@ -35,6 +36,11 @@ Verification Logic:
 - This ensures the POST not only returns a success code, but the backend state reflects the new RFI entry.
 
 Example verification step:
-→ Perform GET /csap/v1/rfi/{incident_id}
-  - Validate the returned RFI entry matches the title and description used in the POST payload
-  - Confirm the incident_id rfi is present and tlp value is correct.
+- Perform GET /csap/v1/rfi/{incident_id}
+- Validate the returned RFI entry matches the title and description used in the POST payload
+- Confirm the incident_id rfi is present and tlp value is correct.
+
+Test Flows:
+- In payload, use random generated values if default values not provided.
+- In testcases, create a rfi and get the incident_id.
+- Use the incident_id to make GET call /csap/v1/rfi/{incident_id}/ and verify response
