@@ -23,8 +23,6 @@
     └── utilities/
         └── utils.py
 
-    I want you to keep in mind that these functions wrapper for requests module in base/api_requests.py
-    Everytime you make a request, you must use these functions
     endpoints must be defined in apiLibrary/open_api/api_endpoints.py
     for example: 
 
@@ -37,16 +35,44 @@
     Pytest-based API testing framework uses a specific convention for generating two files per endpoint: 
     1. A helper file under `apiLibrary/open_api/`.
     2. A test file under `tests/backend_tc/open_api/`.
+  
+    ---> The example of the helper file stored in apiLibrary/open_api/
+    from utilities.utils import Util
+    class OpenAPIDocLibrary:
+
+        def create_folder_payload(self, folder_name, description="", group_id = "", group_edit_access =  False , individual_email="", individual_edit_access = False, parent_folder_id = ""):
+            payload = {
+            "folder_name": folder_name, #payload should be made based on the endpoint schema that varies for each endpoint
+            "description": description,  #payload should be generated without hardcoding any values, and keeping as many fields dynamic as possible
+            "parent_folder_id": parent_folder_id
+                      }
+            if group_id != "":
+                payload["recipient_groups"] = [{
+                                                "group_id": group_id,
+                                                "edit_access": group_edit_access   
+                                               }]
+                    if individual_email != "":
+                        payload["individual_recipients"] = [{
+                        "email" : individual_email,
+                        "edit_access": individual_edit_access}]
+                    return payload
+
+        def create_folder(self,payload):
+            self.log.info("API Request :: Getting Location Details")
+            response = Request.POST(
+                config["API_ENDPOINTS"]["CREATE_FOLDER"],payload, headers=self.headers
+            )
+            response_json = response.json()
+            self.log.info(response_json)
+            return response
 
     Test files include full test classes using pytest, allure, and internal utilities like `GenerateCredentials`, `CSAPAPI`, and helper classes (e.g., `OpenAPIDocLibrary`). Data for tests is sourced from `dataDirectory/common_data.py`, and API status codes are defined in `dataDirectory/api_status_codes.py`.
-    Helper files encapsulate API-specific payload construction logic. The user will provide endpoint definitions and schemas for which they want automated test generation.
-    The following is the an example test file, you will notice general conventions 
+    Helper files encapsulate API-specific payload construction logic. The user will provide endpoint definitions and schemas for which they want automated test code generation.
+    The following is the an example test file, you will notice general conventions.
 
     import pytest
     import allure
     import json
-    from dataDirectory.common_data import DataClass #This module needs to be imported to get commonly used categories and recipient groups used for testing
-    from dataDirectory.api_status_codes import ApiStatusCodes #This module contains all the API Status Codes encoded
     import utilities.Custom_Logger as cl #This is a custom logger used to log our responses and document the test steps
     from apiLibrary.open_api.genrate_custom_param import CSAPAPI #CSAPAPI is a wrapper built on requests to make a query, only this must be used to make queries
     from apiLibrary.open_api.api_endpoint import OpenAPIendpoint #OpenAPIendpoints contains all the open api endpoints
@@ -70,19 +96,12 @@
             self.__class__.csap_open_api = CSAPAPI(self.base_url, self.access_id, self.secret_key) #Initializing CSAPAPI to make queries directly
             self.__class__.rg_api = DashboardRecipientGroups(self.dashboard_token) #Instantiate RecipientGroups class to retrieve rg_id
             self.__class__.doclibrary_open_api = OpenAPIDocLibrary() #Instantiate helper functions
-            self.__class__.rg_id = self.rg_api.get_rg_id(rg_name) #retrieve rg_id
-            self.__class__.analyst_email_id = os.getenv("WEBAPP_MEMBER_ADMIN_EMAIL") #gets variable defined in env
+            self.__class__.rg_id = self.rg_api.get_rg_id(rg_name) # Commonly used function to get recipient groups
+            self.__class__.analyst_email_id = os.getenv("WEBAPP_MEMBER_ADMIN_EMAIL")
 
         #You must create testcases in this fashion
-        @pytest.mark.openApi
-        @allure.title("Create a Basic Folder")
-        def test_create_folder(self):
-            folder_name = "AUTO_Folder_Title" + Util.getUniqueName() #This is used to generate random folder names 
-            payload = self.doclibrary_open_api.create_folder_payload(folder_name = folder_name, description = description) #This function must be defined in the helper function to not populate the Test file
-            response = self.csap_open_api.query("POST", self.base_url + OpenAPIendpoint.upload_folder, data = payload) #Make the query with our custom wrapper 
-            assert response.status_code == ApiStatusCodes.OK, invalid_status_code_message #Validate Response code
-
-        @pytest.mark.openApi
+        
+        @pytest.mark.openApi # This is the default marker we use for openAPI test cases
         @allure.title("Create a Folder with Recipent Groups")
         def test_create_folder_recipientgroups(self):
             folder_name = "AUTO_Folder_Title"+ Util.getUniqueName() #This is used to generate random folder names
@@ -92,33 +111,40 @@
                 group_id = self.rg_id, #pass recipient group id retrieved in class setup)
             response = self.csap_open_api.query("POST", self.base_url + OpenAPIendpoint.upload_folder, data = payload)
             assert response.status_code == ApiStatusCodes.OK, invalid_status_code_message
-            
-        @pytest.mark.apiTestCase    #Folder Details API Testcases
-        @allure.title("Get Folder Details from Folder ID")
-        def test_folder_details(self):
+            # Validating the created folder
             response = self.csap_open_api.query("GET", self.base_url + OpenAPIendpoint.upload_folder, folder_id = self.parent_testfolder_id)
-            assert response.status_code == ApiStatusCodes.OK, invalid_status_code_message
-
-    ---> And the example of the helper file stored in apiLibrary/open_api/
-    from utilities.utils import Util
-    class OpenAPIDocLibrary:
-
-        def create_folder_payload(self, folder_name, description="", group_id = "", group_edit_access =  False , individual_email="", individual_edit_access = False, parent_folder_id = ""):
+            assert response.json()[results]["name"] == folder_name, "Folder name mismatch"
+        
+        # This is another test case from alert module which can be used as an example for generating complex test code with proper Validations
+        # This is just a dummy test case.
+        @pytest.mark.openApi  
+        @allure.title('Verify the update functionality for the Invite Only recipient group.')
+        def test_updating_invite_only_recipient_group(self):
+            #Creating Rg
+            rg_name = DataClass.base_name + "RG_red_invite_" + Util.getUniqueName()
             payload = {
-            "folder_name": folder_name,     #payload should be made based on the endpoint schema that varies for each endpoint
-            "description": description,   #payload should be generated without hardcoding any values, and keeping as many fields dynamic as possible
-            "parent_folder_id": parent_folder_id
-            }
-            if group_id != "":
-                payload["recipient_groups"] = [{
-                "group_id": group_id,
-                "edit_access": group_edit_access   
-            }]
-                    if individual_email != "":
-                        payload["individual_recipients"] = [{
-                        "email" : individual_email,
-                        "edit_access": individual_edit_access}]
-                    return payload
-
-            make sure to remember these conventions are maintained to generate test cases based on endpoints I give you
+                        "name":rg_name
+                      }
+            self.log.info(TestRecipientGroupAPI.create_invite_only_rg_message+rg_name)
+            response = self.csap_open_api.query("POST", self.base_url + OpenAPIendpoint.create_rg, data = payload)
+            assert response.status_code == 200, \
+            RecipientGroupAPI.response_status_code_error_message+str(response.status_code)
+            output_for_creating = response.json()
+            rg_id = output_for_creating["group_id"]
+            #Updating Rg
+            self.log.info("Test Step :: Verifying updating invite only group.")
+            new_rg_name = DataClass.base_name + "RG_red_invite_" + Util.getUniqueName()
+            payload_for_updating = self.recipient_groups_open_api.payload_for_updating_rg(rg_id, new_rg_name)
+            response = self.recipient_groups_open_api.update_recipient_group(payload_for_updating)
+            assert response.status_code == 200, \
+            RecipientGroupAPI.response_status_code_error_message+str(response.status_code)
+            output_for_updating = response.json()
+            assert self.recipient_groups_open_api.validating_rg_updation(payload_for_updating, output_for_updating), \
+            #Inactivating Rg
+            response = self.recipient_groups_open_api.inactivating_rg(rg_id, rg_name)
+            assert response.status_code == 200, \
+            RecipientGroupAPI.response_status_code_error_message+str(response.status_code)
+            
+            ***********
+            make sure to remember these conventions are maintained to generate test cases based on endpoints, schemas and instructions I give you
             i want you to remember this exactly while generating testcases
