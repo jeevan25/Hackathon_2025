@@ -4,13 +4,14 @@ Authentication: Required
 
 Path Parameters:
 {
-  "incident_id": "string"   # Required, Unique identifier of the RFI (e.g., 'CY-5a782453')
+  "incident_id": "string"   # Required, Unique identifier of the RFI. Needs to be fetched from the response of POST /csap/v1/rfi/. 
 }
 
 Key Notes:
-- Use the `incident_id` from a previously created RFI (POST /csap/v1/rfi/).
+- Create a RFI using (POST /csap/v1/rfi/ response). Use the response to fetch the incident_id from response.
 - Returns details of a single RFI corresponding to the provided `incident_id`.
 - Endpoint returns a list of one item under `data`.
+- Follow the mentioned Test Flows and Verification Logic to create testcases
 
 Expected Response:
 {
@@ -36,3 +37,7 @@ Verification Logic:
   - Capture the `incident_id` from the POST response.
   - Perform GET /csap/v1/rfi/{incident_id}
   - Verify returned RFI matches the created values (title, description, tlp).
+
+Test Flows:
+- First create a tag using the POST endpoint (/csap/v1/rfi/)
+- Use the response to fetch the RFI incident_id and use the same in path parameters of GET call.
