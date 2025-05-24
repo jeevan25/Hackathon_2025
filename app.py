@@ -7,7 +7,9 @@ from datetime import datetime
 import time
 from dotenv import load_dotenv
 from bitbucket_try import create_branch_with_file_changes
-from sample_generated_output import sample_output, extract_files_and_contents
+from sample_generated_output import extract_files_and_contents
+from Test_generator.test_generator import *
+from global_store import globalStore
 
 load_dotenv()
 
@@ -20,9 +22,8 @@ FILE_CHANGES = {
     'README2.md': '# Updated by Python script\nThis is an automated update.\n'
 }
 test_file_pattern = r'^test_.*\.py$'
+ai_output_global_store = globalStore()
 
-
-files_data = extract_files_and_contents(sample_output)
 def basic_file_change_logic(files_data):
     for file_name, content in files_data.items():
         if re.match(test_file_pattern, file_name):
@@ -162,17 +163,19 @@ def handle_generate_testcases_command(ack, say, command):
         return
 
     endpoint = params[0] if len(params) > 0 else None
-    instructions = params[1] if len(params) > 1 else "1"  
+    instructions = params[1] if len(params) > 1 else ""  
     if not endpoint:
         say(f"<@{user_id}>, please specify the CSAP endpoint you want to generate automation testcases for.")
         return
     
     say("Generating Testcases, this may take a while....")
-    time.sleep(2)
-    #open ai prompt output
+    ai_output = generate_test_code(endpoint, instructions)
+    files_data = extract_files_and_contents(ai_output)
     
     for file, content in files_data.items():
         say(f"*{file}*```\n{content}```")
+        
+    ai_output_global_store.store_ai_output(ai_output)
 
     confirmation_text = f"Would you like to add them to your bitbucket repository?"
     
@@ -194,7 +197,7 @@ def handle_generate_testcases_command(ack, say, command):
                         "text": "Create Branch",
                         "emoji": True
                     },
-                    "action_id": "button_create_branch"
+                    "action_id": "button_create_branch",
                 }
             ]
         }
@@ -210,6 +213,9 @@ def handle_create_branch_button(ack, body, logger, respond):
     ack(f"Button 'button_create_branch' clicked by user <@{user_id}>")
     logger.info(f"Full body of the action: {body}")
     try:
+        ai_output = ai_output_global_store.get_ai_output()
+        print(f"Inside Create Branch Button: {ai_output}")
+        files_data = extract_files_and_contents(ai_output)
         file_changes = basic_file_change_logic(files_data)
         create_branch_with_file_changes(NEW_BRANCH_NAME,file_changes)
         respond(f"Sucessfully Created a Branch in CSAP Automation Repo with name: `{NEW_BRANCH_NAME}`")

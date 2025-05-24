@@ -1,10 +1,36 @@
-import re
+import os
+import git
+import requests
+from datetime import datetime
+from dotenv import load_dotenv
 
-sample_output = '''Sure, I will generate the test file and helper file as per your request.
+# === CONFIG ===
+load_dotenv(override=True)
 
-Test File: test_allowed_indicators_api.py
-```python
-import pytest
+def create_branch_with_file_changes(new_branch_name, file_changes):
+    repo = git.Repo(os.getenv("LOCAL_REPO_PATH"))
+    origin = repo.remote(name='origin')
+
+    new_branch = repo.create_head(new_branch_name)
+    new_branch.checkout()
+
+    # Apply file changes
+    for filename, content in file_changes.items():
+        file_path = os.path.join(os.getenv("LOCAL_REPO_PATH"), filename)
+        with open(file_path, 'w') as f:
+            f.write(content)
+
+    # Commit and push
+    repo.git.add(A=True)
+    repo.index.commit(f"Automated commit to {new_branch_name}")
+    origin.push(new_branch_name)
+    
+    print(f"Branch {new_branch_name} created and pushed successfully.")
+    
+NEW_BRANCH_NAME = f'auto-test-branch-{datetime.now().strftime("%Y%m%d-%H%M%S")}'
+FILE_CHANGES = {
+    'README2.md': '# Updated by Python script\nThis is an automated update.\n',
+    'tests/backend_tc/open_api/test_allowed_indicators_api.py' : '''import pytest
 import allure
 from apiLibrary.open_api.generate_credentials import GenerateCredentials
 from apiLibrary.open_api.allowed_indicators_api import AllowedIndicatorsAPI
@@ -73,48 +99,13 @@ class TestAllowedIndicatorsAPI:
     def test_add_indicator_with_numbers(self):
         payload = self.allowed_indicators_api.create_payload(threat_indicators="123456")
         response = self.csap_open_api.query("POST", self.base_url + OpenAPIendpoint.allowed_indicators, data=payload)
-        assert response.status_code == ApiStatusCodes.OK
-```
-
-Helper File: allowed_indicators_api.py
-```python
-class AllowedIndicatorsAPI:
+        assert response.status_code == ApiStatusCodes.OK''',
+    'apiLibrary/open_api/allowed_indicators_api.py': '''class AllowedIndicatorsAPI:
     def create_payload(self, threat_indicators):
         payload = {
             "threat_indicators": threat_indicators
         }
-        return payload
-```
+        return payload'''
+}
 
-Please note that these test cases are written based on the information provided and may need to be adjusted based on the actual behavior of the API.
-'''
-
-# FILE_CHANGES = {
-#     'README2.md': '# Updated by Python script\nThis is an automated update.\n'
-# }
-
-def extract_files_and_contents(sample_output: str) -> dict:
-    file_dict = {}
-    
-    # Regular expression to find file blocks like: Test File: filename.py or Helper File: filename.py
-    pattern = r"(?:Test File|Helper File):\s*(\S+)\n```python\n(.*?)```"
-    
-    matches = re.findall(pattern, sample_output, re.DOTALL)
-    
-    for file_name, code_content in matches:
-        file_dict[file_name] = code_content.strip()
-    
-    return file_dict
-
-# test_file_pattern = r'^test_.*\.py$'
-# files_data = extract_files_and_contents(sample_output)
-
-# def basic_file_change_logic(files_data):
-#     for file_name, content in files_data.items():
-#         if re.match(test_file_pattern, file_name):
-#             FILE_CHANGES[f"tests/backend_tc/open_api/{file_name}"] = content
-#         else:
-#             FILE_CHANGES[f"apiLibrary/open_api/{file_name}"] = content
-#     return FILE_CHANGES
-
-# basic_file_change_logic(files_data)
+# create_branch_with_file_changes(NEW_BRANCH_NAME, FILE_CHANGES)

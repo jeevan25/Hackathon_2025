@@ -44,7 +44,7 @@ def query_vector_db(query, top_k=2):
     return [match["metadata"]["text"] for match in results["matches"]]
 
 def build_final_prompt(user_input, context_chunk,extra_input):
-    file_path1 = "/Users/jeevan.kumar/Documents/Hackathon_2025/Instructions/instruct.txt"
+    file_path1 = "/Users/akhilpendyala/Documents/Hackathon/Hackathon_2025/Instructions/instruct.txt"
     with open(file_path1, "r", encoding="utf-8") as f:
         text = f.read()
         text = text.replace('\n', '')
@@ -67,10 +67,12 @@ def build_final_prompt(user_input, context_chunk,extra_input):
                 Specific user Input:
                 {user_input}
 
-                Generate 10 test cases(5 positive, 2 negative and 3 edge case) in Python. Generate a test file and a helper file
+                Generate 10 test cases(5 positive, 2 negative and 3 edge case) in Python. 
+                Generate a test file and a helper file, 
+                mention Test File: test_*_api.py, Helper File: *_api.py
                 """
 
-def generate_test_code(user_input,test_file_name,extra_input=""):
+def generate_test_code(user_input,extra_input=""):
     """Orchestrates the entire flow from query to final response."""
     context_chunk = query_vector_db(user_input)
     final_prompt = build_final_prompt(user_input, context_chunk,extra_input)
@@ -85,12 +87,14 @@ def generate_test_code(user_input,test_file_name,extra_input=""):
         temperature=0.3
     )
     print("\n Generated Test Cases:\n")
-    print(response.choices[0].message.content)
-    output_dir = "/Users/jeevan.kumar/Documents/Hackathon_2025/GeneratedTests"
-    os.makedirs(output_dir, exist_ok=True)  # creates folder if not present
-    output_file = os.path.join(output_dir, "generated_"+test_file_name+".py")
-    with open(output_file, "w", encoding="utf-8") as f:
-          f.write(response.choices[0].message.content)
+    response = response.choices[0].message.content
+    print(response)
+    return response
+    # output_dir = "/Users/jeevan.kumar/Documents/Hackathon_2025/GeneratedTests"
+    # os.makedirs(output_dir, exist_ok=True)  # creates folder if not present
+    # output_file = os.path.join(output_dir, "generated_"+test_file_name+".py")
+    # with open(output_file, "w", encoding="utf-8") as f:
+    #       f.write(response.choices[0].message.content)
     
     
 
@@ -98,7 +102,7 @@ def generate_test_code(user_input,test_file_name,extra_input=""):
 if __name__ == "__main__":
     # user_question = input("/csap/v1/allowed_indicators/")
     user_question = input("Enter your end point : ")
-    test_file_name = input("Enter the test file name : ")
+    # test_file_name = input("Enter the test file name : ")
     extra_input = input("Enter any specific input (Optional) : ")
 
-    generate_test_code(user_question,test_file_name,extra_input)
+    generate_test_code(user_question,extra_input)
