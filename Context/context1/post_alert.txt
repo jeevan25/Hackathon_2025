@@ -1,0 +1,50 @@
+Endpoint: /csap/v1/create_card  
+Method: POST  
+Authentication: Required  
+
+Payload Schema:
+{
+  "title": "string",                    // Required, title of the alert
+  "content": "string",                  // Required, description/content of the alert
+  "status": "string",                  // Required, status of the alert
+                                        // Enum: ["DRAFT", "PUBLISHED"]
+  "tlp": "string",                     // Required, TLP classification of the alert. Allowed values ["RED", "GREEN", "WHITE", "AMBER"]
+  "card_category": {                    // Optional, category object for the alert
+    "category_name": "string"           // Required within card_category, name of the category which will be fixed as the category_name provided in the sample testcases.
+  },
+  "card_group": ["string"],             // Optional, list of recipient group name which will be fixed as the rg_name provided in the sample testcases.
+  "push_email_notification": true,      // Optional, true to send email notifications
+  "push_required": true                 // Optional, true to send mobile notifications
+}
+
+Key Notes:
+- "title", "content", and "status" are mandatory fields.
+- Allowed values for `status`: "DRAFT", "PUBLISHED"
+- Allowed values for `tlp`: "RED", "GREEN", "WHITE", "AMBER"
+- "card_category" must include both `category_id` and `category_name` if provided.
+- Email and mobile push notifications can be toggled using `push_email_notification` and `push_required`.
+- "category_name" and "card_group" values should be fixed as the provided category_name and rg_name in the sample testcases.
+
+Expected Response:
+{
+  "short_id": "AL-1a2b3c4d",                      // 8-digit unique ID of the created alert
+  "title": "New Malware Variant Targeting...",   // Title of the alert
+  "content": "Detailed description of threat",   // Description/content of the alert
+  "status": "PUBLISHED",                         // Status of the alert
+  "tlp": "AMBER"                                  // TLP classification for the alert
+}
+
+Verification Logic:
+- After a POST request is made, use /csap/v1/get_alert_detail/{short_id} GET request to confirm the alert was actually added.
+- This ensures that the POST not only returns a successful status code but that the backend state reflects the change.
+
+Example verification step:
+→ Perform GET /csap/v1/get_alert_detail/{short_id}
+  - Validate the returned alert contains "short_id" matching the POST response.
+  - Confirm "title", "content", "status", and "tlp" match the POST request.
+  - Confirm other fields like `card_category` and `card_group` are correctly associated.
+
+Error Scenarios:
+- Missing required fields ("title", "content", "status") will return 400 Bad Request.
+- If an invalid or malformed `card_group` or `card_category` is passed, it will return 400 Bad Request.
+- If `category_id` does not exist, alert creation will fail with 400.

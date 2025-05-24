@@ -17,9 +17,9 @@ Dependencies:
 
 Expected Response:
 {
-  "incident_id": "CY-5a782453",     # Unique identifier of the intel
+  "incident_id": Incident ID,     # Unique identifier of the intel
   "title": "Sample Intel Title",    # Title of the intel
-  "description": "Detailed description of the intel",   # Description of the submitted intel
+  "description": "Description of the intel",   # Description of the submitted intel
   "tlp": "AMBER"                    # TLP classification associated with the intel
 }
 
