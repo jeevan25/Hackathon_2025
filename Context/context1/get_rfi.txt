@@ -18,7 +18,7 @@ Expected Response:
   "count": 1,                      // Number of matching RFIs found (always 1 for this endpoint)
   "data": [
     {
-      "incident_id": "CY-5a782453", // Unique ID of the RFI
+      "incident_id": "rfi id", // Unique ID of the Fetched RFI
       "title": "title",             // Title of the RFI
       "description": "description", // Description of the RFI
       "tlp": "WHITE",               // TLP level (WHITE, GREEN, AMBER, RED)
@@ -39,5 +39,5 @@ Verification Logic:
   - Verify returned RFI matches the created values (title, description, tlp).
 
 Test Flows:
-- First create a tag using the POST endpoint (/csap/v1/rfi/)
+- First create a rfi using the POST endpoint (/csap/v1/rfi/)
 - Use the response to fetch the RFI incident_id and use the same in path parameters of GET call.

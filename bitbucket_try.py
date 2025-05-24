@@ -10,6 +10,9 @@ load_dotenv(override=True)
 def create_branch_with_file_changes(new_branch_name, file_changes):
     repo = git.Repo(os.getenv("LOCAL_REPO_PATH"))
     origin = repo.remote(name='origin')
+    
+    repo.git.checkout("main")
+    origin.pull("main")
 
     new_branch = repo.create_head(new_branch_name)
     new_branch.checkout()

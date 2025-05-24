@@ -22,7 +22,7 @@ Allowed TLP Values:
 
 Expected Response:
 {
-  "incident_id": "CY-4b2a825a",       // Unique identifier for the RFI
+  "incident_id": "created rfi id",       // Unique identifier for the RFI
   "title": "RFI Title",               // Title of the created RFI
   "description": "Description of the RFI", // Description content
   "tlp": "GREEN"                      // TLP level of the RFI

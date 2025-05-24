@@ -68,7 +68,7 @@ def build_final_prompt(user_input, context_chunk,extra_input):
                 {user_input}
 
                 Generate 10 test cases(5 positive, 2 negative and 3 edge case) in Python. 
-                Generate a test file and a helper file, 
+                Generate a test file and a helper file,
                 """
     
     
