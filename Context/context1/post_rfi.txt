@@ -1,0 +1,40 @@
+Endpoint: /csap/v1/rfi/
+Method: POST
+Authentication: Required
+
+Payload Schema:
+{
+  "title": "string",        // Required, title of the RFI
+  "description": "string",  // Required, description of the RFI
+  "tlp": {
+       "tlp_name": "GREEN"       // Required, TLP level (must be one of: RED, AMBER, GREEN, WHITE)
+  }
+}
+
+Key Notes:
+- "title" is a mandatory field that defines the RFI title.
+- "description" is required and provides contextual information about the RFI.
+- "tlp" is required and must be one of the predefined levels: RED, AMBER, GREEN, WHITE.
+
+Allowed TLP Values:
+["RED", "AMBER", "GREEN", "WHITE"]
+
+Expected Response:
+{
+  "incident_id": "CY-4b2a825a",       // Unique identifier for the RFI
+  "title": "RFI Title",               // Title of the created RFI
+  "description": "Description of the RFI", // Description content
+  "tlp": "GREEN"                      // TLP level of the RFI
+}
+
+Error Scenarios:
+- Missing any of the required fields ("title", "description", or "tlp") returns 400 Bad Request.
+
+Verification Logic:
+- After a POST request is made, use the GET request /csap/v1/rfi/{incident_id} to confirm the RFI was actually created.
+- This ensures the POST not only returns a success code, but the backend state reflects the new RFI entry.
+
+Example verification step:
+→ Perform GET /csap/v1/rfi/{incident_id}
+  - Validate the returned RFI entry matches the title and description used in the POST payload
+  - Confirm the incident_id rfi is present and tlp value is correct.

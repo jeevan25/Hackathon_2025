@@ -1,0 +1,36 @@
+Endpoint: /csap/v1/report_intel/
+Method: POST
+Authentication: Required
+
+Payload Schema:
+{
+  "category": "string",       // Required, category ID of the intel. Fetch from /csap/v1/list_intel_category/
+  "title": "string",          // Required, title of the intel
+  "description": "string",    // Required, description of the intel
+  "tlp": "string"             // Required, TLP level (must be one of: RED, AMBER, GREEN, WHITE)
+}
+
+Key Notes:
+- All fields are mandatory.
+- The `category` must be a valid category ID retrieved from the /csap/v1/list_intel_category/ endpoint.
+- The TLP field should match one of the allowed values exactly.
+
+Verification Logic:
+- After a POST request is made, validate that the response contains the correct `incident_id`, `title`, `description`, and `tlp`.
+- After a POST request is made, use the GET request /csap/v1/get_intel_detail/{incident_id} to confirm the intel was actually created.
+- This ensures the POST not only returns a success code, but the backend state reflects the new Intel entry.
+
+Dependencies:
+- category: Requires prior use of /csap/v1/list_intel_category/ to fetch valid category IDs.
+
+Expected Response:
+{
+  "incident_id": "CY-8a31bc77",       // Unique ID of the intel created
+  "title": "Intel Title",             // Title as provided in the request
+  "description": "Intel Description", // Description as provided in the request
+  "tlp": "GREEN"                      // TLP level as provided in the request
+}
+
+Error Scenarios:
+- Missing required fields will return 400 Bad Request.
+- If the category ID is invalid, the server should return 400 error.
