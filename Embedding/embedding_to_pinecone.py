@@ -168,7 +168,7 @@ def embed_and_store_item(text, source_filename, openai_client_instance, pinecone
 if __name__ == "__main__":
     # chunk = read_context_files("/Users/jeevan.kumar/Documents/Hackathon_2025/Context/context1")
     # embed_and_store_item(chunk,openai_client,index)
-    file_path = "/Users/jeevan.kumar/Documents/Hackathon_2025/Context/context1/post_tag.txt"
+    file_path = "Context/context1/get_intel_category.txt"
     
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
@@ -180,4 +180,4 @@ if __name__ == "__main__":
         "metadata": {"source": os.path.basename(file_path), "text": text}
     }
 
-    embed_and_store_item(single_chunk,"post_tag.txt", openai_client, pc.Index(index_name))
+    embed_and_store_item(single_chunk,"get_intel_category.txt", openai_client, pc.Index(index_name))
