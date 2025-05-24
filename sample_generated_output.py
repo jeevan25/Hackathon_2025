@@ -109,42 +109,23 @@ FILE_CHANGES = {
     'README2.md': '# Updated by Python script\nThis is an automated update.\n'
 }
 
-def extract_files_and_contents(sample_output: str) -> Dict[str, str]:
-    """
-    Extracts Python code blocks labeled with 'Test File:' or 'Helper File:'.
-
-    Args:
-        sample_output (str): A string containing labeled code blocks.
-
-    Returns:
-        Dict[str, str]: Mapping of file names to code strings.
-    """
-    file_dict = {}
-
-    # Match either "Test File:" or "Helper File:" followed by filename and a Python code block
-    pattern = r"(?:Test File|Helper File):\s*`?([^`\n]+?)`?\s*```python\s*(.*?)```"
-
-    matches = re.findall(pattern, sample_output, re.DOTALL | re.IGNORECASE)
-
-    for file_name, code in matches:
-        file_name = file_name.strip()
+def extract_files_and_contents(text: str) -> dict:
+    files = {"test_files": [], "helper_files": []}
+    
+    # Split the text using ```python as the start of a code block
+    parts = text.split("```python")
+    
+    for part in parts[1:]:  # skip the first part, which is before the first code block
+        # End of code block
+        code, *_ = part.split("```", 1)
         code = code.strip()
-        if file_name and code:
-            file_dict[file_name] = code
-
-    return file_dict
-
-
-
-test_file_pattern = r'^test_.*\.py$'
-files_data = extract_files_and_contents(sample_output)
-
-def basic_file_change_logic(files_data):
-    for file_name, content in files_data.items():
-        if re.match(test_file_pattern, file_name):
-            FILE_CHANGES[f"tests/backend_tc/open_api/{file_name}"] = content
+        
+        # Classification logic
+        if "pytest" in code:
+            files["test_files"].append(code)
         else:
-            FILE_CHANGES[f"apiLibrary/open_api/{file_name}"] = content
-    return FILE_CHANGES
+            files["helper_files"].append(code)
+    
+    return files
 
-basic_file_change_logic(files_data)
+files_data = extract_files_and_contents(sample_output)

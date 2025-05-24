@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 from dotenv import load_dotenv
 from bitbucket_try import create_branch_with_file_changes
-from sample_generated_output import extract_files_and_contents
+from sample_generated_output import sample_output, extract_files_and_contents
 from Test_generator.test_generator import *
 from global_store import globalStore
 
@@ -17,23 +17,21 @@ SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN')
 SLACK_APP_TOKEN = os.getenv('SLACK_APP_TOKEN')
 SIGNING_TOKEN = os.getenv('SLACK_SIGNING_TOKEN')
 
-NEW_BRANCH_NAME = f'auto-test-branch-{datetime.now().strftime("%Y%m%d-%H%M%S")}'
+NEW_BRANCH_NAME = f'autotestgen-branch-{datetime.now().strftime("%Y%m%d-%H%M%S")}'
 FILE_CHANGES = {
     'README2.md': '# Updated by Python script\nThis is an automated update.\n'
 }
-test_file_pattern = r'^test_.*\.py$'
 ai_output_global_store = globalStore()
 
-def basic_file_change_logic(files_data):
-    for file_name, content in files_data.items():
-        if re.match(test_file_pattern, file_name):
-            FILE_CHANGES[f"tests/backend_tc/open_api/{file_name}"] = content
-        else:
-            FILE_CHANGES[f"apiLibrary/open_api/{file_name}"] = content
+def get_file_changes(ai_output, module_name):
+    files = extract_files_and_contents(ai_output)
+    for file in files["test_files"]:
+        FILE_CHANGES[f"tests/backend_tc/open_api/tests_{module_name}_api.py"] = file
+
+    for file in files["helper_files"]:
+        FILE_CHANGES[f"apiLibrary/open_api/{module_name}_api.py"] = file
+    
     return FILE_CHANGES
-
-
-
 
 
 app = App(
@@ -163,17 +161,24 @@ def handle_generate_testcases_command(ack, say, command):
         return
 
     endpoint = params[0] if len(params) > 0 else None
-    instructions = params[1] if len(params) > 1 else ""  
+    module = params[1] if len(params) > 1 else None
+    instructions = params[2] if len(params) > 2 else ""  
     if not endpoint:
         say(f"<@{user_id}>, please specify the CSAP endpoint you want to generate automation testcases for.")
         return
+
+    if not module:
+        say(f"<@{user_id}>, please provide which CSAP module you want to generate automation testcases for: ")
     
     say("Generating Testcases, this may take a while....")
     ai_output = generate_test_code(endpoint, instructions)
-    files_data = extract_files_and_contents(ai_output)
+    files = extract_files_and_contents(ai_output)
     
-    for file, content in files_data.items():
-        say(f"*{file}*```\n{content}```")
+    for file in files["test_files"]:
+        say(f"```{file}```")
+        
+    for file in files["helper_files"]:
+        say(f"```{file}```")
         
     ai_output_global_store.store_ai_output(ai_output)
 
@@ -198,6 +203,7 @@ def handle_generate_testcases_command(ack, say, command):
                         "emoji": True
                     },
                     "action_id": "button_create_branch",
+                    "value" : module
                 }
             ]
         }
@@ -213,10 +219,10 @@ def handle_create_branch_button(ack, body, logger, respond):
     ack(f"Button 'button_create_branch' clicked by user <@{user_id}>")
     logger.info(f"Full body of the action: {body}")
     try:
+        module = body['actions'][0]['value']
         ai_output = ai_output_global_store.get_ai_output()
         print(f"Inside Create Branch Button: {ai_output}")
-        files_data = extract_files_and_contents(ai_output)
-        file_changes = basic_file_change_logic(files_data)
+        file_changes = get_file_changes(ai_output, module)
         create_branch_with_file_changes(NEW_BRANCH_NAME,file_changes)
         respond(f"Sucessfully Created a Branch in CSAP Automation Repo with name: `{NEW_BRANCH_NAME}`")
     except:
