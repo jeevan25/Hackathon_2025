@@ -25,7 +25,7 @@ Dependencies:
 
 Expected Response:
 {
-  "incident_id": "CY-8a31bc77",       // Unique ID of the intel created
+  "incident_id": Created Intel ID,       // Unique ID of the intel created
   "title": "Intel Title",             // Title as provided in the request
   "description": "Intel Description", // Description as provided in the request
   "tlp": "GREEN"                      // TLP level as provided in the request
