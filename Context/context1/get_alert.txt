@@ -1,0 +1,48 @@
+Endpoint: /csap/v1/get_alert_detail/{short_id}
+Method: GET  
+Authentication: Required
+
+Path Parameters:
+{
+  "short_id": "string"   # Required, 8-digit unique ID of the alert obtained from POST /csap/v1/create_card
+}
+
+Key Notes:
+- This endpoint retrieves detailed information about a specific alert using its short ID.
+- The short ID is generated during alert creation and must be stored for subsequent reference.
+
+Expected Response:
+{
+  "short_id": "8a2f7c1d",                       # Unique 8-digit identifier of the alert
+  "title": "Sample Alert Title",               # Title of the alert
+  "content": "This is a sample alert content", # Description/content of the alert
+  "status": "OPEN",                            # Current status of the alert (e.g., OPEN, CLOSED)
+  "tlp": "AMBER",                              # TLP (Traffic Light Protocol) level assigned to the alert
+  "card_group": [                              # Recipients to whom the alert is published
+    {
+      "id": "group-id-123",                    # ID of a group recipient
+      "name": "SOC Team"                       # Name of the group
+    }
+  ],
+  "individual_recipients": [                   # List of individual recipients
+    {
+      "user_id": "user-001",                   # User ID
+      "email": "john@example.com"              # Email of the recipient
+    }
+  ],
+  "recipient_groups": [                        # List of recipient groups
+    {
+      "group_id": "grp-456",                   # Group ID
+      "group_name": "CTI Analysts"             # Group name
+    }
+  ],
+  "card_category": {                           # Alert category
+    "category_id": "d56d03d9",                 # Category ID
+    "category_name": "Cyber Threats"           # Category name
+  },
+  "card_info": "Additional alert information"  # Additional details associated with the alert
+}
+
+Error Scenarios:
+- If the provided `short_id` is not found, the server returns 404 Not Found.
+- If the `short_id` is in an invalid format (not 8 characters), the server may return 404 Bad Request.
